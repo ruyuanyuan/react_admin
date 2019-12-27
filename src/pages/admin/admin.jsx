@@ -13,6 +13,7 @@ import User from '../user/user'
 import Bar from '../chart/bar'
 import Line from '../chart/line'
 import Pie from '../chart/pie'
+import Order from '../order/order'
 
 const { Footer, Sider, Content } = Layout;
 export default class Admin extends React.Component{
@@ -29,7 +30,7 @@ export default class Admin extends React.Component{
               </Sider>
               <Layout>
                 <Header></Header>
-                <Content style={{background:'#fff'}}>
+                <Content style={{background:'#fff',margin:'20px 20px 0'}}>
                   <Switch>
                     <Route path='/home' component={Home}></Route>
                     <Route path='/category' component={Category}></Route>
@@ -39,7 +40,7 @@ export default class Admin extends React.Component{
                     <Route path='/charts/bar' component={Bar}></Route>
                     <Route path='/charts/line' component={Line}></Route>
                     <Route path='/charts/pie' component={Pie}></Route>
-                    <Route path='/order' component={Pie}></Route>
+                    <Route path='/order' component={Order}></Route>
                     <Redirect to='/home'></Redirect>
                   </Switch>
                 </Content>

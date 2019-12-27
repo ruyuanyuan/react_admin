@@ -59,3 +59,4 @@ const  menuList = [
     icon:'windows'
   }
 ]
+export default menuList

@@ -1,11 +1,77 @@
 import React from 'react'
 import './index.less'
 import logo from '../../assets/images/logo.png'
-import {Link} from 'react-router-dom'
+import {Link, withRouter } from 'react-router-dom'
 import { Menu, Icon } from 'antd';
+import menuList from '../../config/menu.config'
 const { SubMenu } = Menu
-export default class LeftNav extends React.Component{
+class LeftNav extends React.Component{
+  //根据数据去生成菜单 map+递归
+  getMenuList = (menuList)=>{
+    
+    return menuList.map(item=>{
+      if(!item.children){
+        return  <Menu.Item key={item.path}>
+                  <Link to={item.path}>
+                    <Icon type={item.icon} />
+                    <span>{item.title}</span>
+                  </Link>
+                </Menu.Item>
+      }else{
+        //获取当前路由路径
+          const path = this.props.location.pathname
+          const cItempath = item.children.find(citem=>citem.path===path)
+          if(cItempath){
+            this.openkey = item.path
+          }
+          return  <SubMenu
+                    key={item.path}
+                    title={
+                      <span>
+                        <Icon type={item.icon} />
+                        <span>{item.title}</span>
+                      </span>
+                    }
+                  > 
+                    {this.getMenuList(item.children)}
+                  </SubMenu>
+      }
+      
+    })
+  }
+  //reduce实现
+  getMenuNode = (menuList)=>{
+   return menuList.reduce((menu,item)=>{
+      if(!item.children){
+        menu.push((<Menu.Item key={item.path}>
+                  <Link to={item.path}>
+                    <Icon type={item.icon} />
+                    <span>{item.title}</span>
+                  </Link>
+                </Menu.Item>))
+      }else{
+        menu.push((<SubMenu
+          key={item.path}
+          title={
+            <span>
+              <Icon type={item.icon} />
+              <span>{item.title}</span>
+            </span>
+          }
+        > 
+          {this.getMenuNode(item.children)}
+        </SubMenu>))
+      }
+      return menu
+    },[])
+  }
+  componentWillMount(){
+    this.menuList= this.getMenuList(menuList)
+  }
   render(){
+    //获取当前路由路径
+    const path = this.props.location.pathname
+
     return <div className='left-nav'>
               <Link to='/'>
                 <header className='left-nav-header'>
@@ -14,16 +80,18 @@ export default class LeftNav extends React.Component{
                 </header>
               </Link>
               <Menu
-                defaultSelectedKeys={'1'}
+                selectedKeys={[path]}
+                defaultOpenKeys={[this.openkey]}
                 mode="inline"
                 theme="dark"
               >
-                  <Menu.Item key="/home">
+                {this.menuList}
+                {/* <Menu.Item key="/home">
                   <Link to='/home'>
                     <Icon type="pie-chart" />
                     <span>首页</span>
                     </Link>
-                  </Menu.Item>
+                </Menu.Item>
               
                 <SubMenu
                   key="sub1"
@@ -50,56 +118,10 @@ export default class LeftNav extends React.Component{
                     </Menu.Item>
                   
                 </SubMenu>
-                
-                <Menu.Item key="/user">
-                <Link to='/user'>
-                  <Icon type="pie-chart" />
-                  <span>用户管理</span>
-                  </Link>
-                </Menu.Item>
-                
-                
-                <Menu.Item key="/role">
-                <Link to='/role'>
-                  <Icon type="pie-chart" />
-                  <span>角色管理</span>
-                  </Link>
-                </Menu.Item>
-               
-                <SubMenu
-                  key="/chart"
-                  title={
-                    <span>
-                      <Icon type="mail" />
-                      <span>图表</span>
-                    </span>
-                  }
-                > 
-                    <Menu.Item key="/charts/bar">
-                    <Link to='/charts/bar'>
-                      <Icon type="mail" />
-                      <span>柱状图</span>
-                      </Link>
-                    </Menu.Item>
-                  
-                  
-                    <Menu.Item key="/charts/line">
-                    <Link to='/charts/line'>
-                      <Icon type="mail" />
-                      <span>线型图</span>
-                      </Link>
-                    </Menu.Item>
-                 
-                 
-                    <Menu.Item key="/charts/pie">
-                    <Link to='/charts/pie'>
-                      <Icon type="mail" />
-                      <span>饼图</span>
-                      </Link>
-                    </Menu.Item>
-                
-                </SubMenu>
+                 */}
               </Menu>
            </div>
   }
 }
+
+export default withRouter(LeftNav)
