@@ -43,7 +43,7 @@ class Login extends React.Component{
   render(){                                                                                                                                                                                                                                                                                                                                                                                                                                              
     const { getFieldDecorator } = this.props.form;
     const user = memory.user
-    if(user||user._id){
+    if(user&&user._id){
       return <Redirect to='/'></Redirect>
     }
     return (
