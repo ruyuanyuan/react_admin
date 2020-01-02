@@ -2,11 +2,13 @@ import React from 'react'
 import {Card,Table,Button,Icon,message,Modal} from 'antd'
 import LinkButton from '../../components/link-button'
 import {categorys,addCategorys,upadteCategorys} from '../../api/index'
+import AppForm from './addForm'
+import UpdateForm from './updateForm'
 export default class Category extends React.Component{
   state = {
     loading:false,
-    categroys:[],
-    subCategroys:[],
+    categorys:[],
+    subCategorys:[],
     parentId:'0',//当前的分类ID
     parentName:'',//一级分类名称
     showStatus:0, //更新添加框显示 0 不显示 1显示添加 2显示更新
@@ -21,34 +23,36 @@ export default class Category extends React.Component{
       {
         title: '操作',
         width:300,
-        render:(categroy)=>(
+        render:(record)=>(
+          
           <span>
-            <LinkButton onClick={this.showUpate}>修改分类</LinkButton>
+            <LinkButton onClick={()=>{this.showUpate(record)}}>修改分类</LinkButton>
             {
-              this.state.parentId==='0'? <LinkButton onClick={(categroy)=>{this.showSubsubCategroys(categroy)}}>查看分类</LinkButton>:null
+              this.state.parentId==='0'? <LinkButton onClick={()=>{this.showSubsubCategorys(record)}}>查看分类</LinkButton>:null
             }
           </span>
         )
       }
     ]
   }
-  showCategroys=()=>{
+  showCategorys=()=>{
+    console.log(1)
     this.setState({
       parentId:'0',
       parentName:'',
-      subCategroys:[]
+      subcategorys:[]
     })
   }
   //显示二级分类
-  showSubsubCategroys=(categroy)=>{
+  showSubsubCategorys=(record)=>{
     this.setState({
-      parentId:categroy._id,
-      parentName:categroy.name
+      parentId:record._id,
+      parentName:record.name
     },()=>{
-      this.getCategroys()
+      this.getcategorys()
     })
   }
-  getCategroys= async ()=>{
+  getcategorys= async ()=>{
     this.setState({
       loading:true
     })
@@ -59,7 +63,7 @@ export default class Category extends React.Component{
       if(parentId==='0'){
         this.setState({categorys})
       }else{
-        this.setState({subCategroys:categorys})
+        this.setState({subcategorys:categorys})
       }
       
     }else{
@@ -72,6 +76,8 @@ export default class Category extends React.Component{
  
   //点击取消
   handleCancel=()=>{
+    //重置数据
+    this.form.resetFields()
     this.setState({
       showStatus:0
     })
@@ -83,37 +89,66 @@ export default class Category extends React.Component{
     })
   }
   //添加分类
-  addCategory=()=>{
+  addCategory=async ()=>{
     console.log('addCategory')
     this.setState({
       showStatus:0
     })
+    const {parentId,cartgroyName} = this.form.getFieldsValue()
+    //重置数据
+    this.form.resetFields()
+    //添加分类接口
+    let result = await addCategorys(parentId,cartgroyName)
+    if(result.status===0){
+      this.getcategorys()
+    }else{
+      message.error('添加分类失败')
+    }
   }
   // 显示更新分类
-  showUpate=()=>{
+  showUpate=(record)=>{
+    //保存分类对象
+    this.categroy=record
     this.setState({
       showStatus:2
     })
   }
   //更新分类
-  upadteCategory=()=>{
+  upadteCategory=async ()=>{
     console.log('upadteCategory')
+    this.setState({
+      showStatus:0
+    })
+    const categoryId = this.categroy._id
+    const categoryName = this.form.getFieldValue('categoryName')
+    //重置数据
+    this.form.resetFields()
+    //更新接口
+    let result = await upadteCategorys(categoryId,categoryName)
+    if(result.status===0){
+      this.getcategorys()
+    }else{
+      message.error('分类名称修改失败')
+    }
+    
   }
+
   //为第一次render准备数据
   componentWillMount(){
     this.initTableColumns()
   }
   //发送请求
   componentDidMount(){
-    this.getCategroys()
+    this.getcategorys()
   }
   render(){
     //读取动态数据
-    const {categroys,loading,subCategroys,parentId,parentName,showStatus} = this.state
+    const {categorys,loading,subcategorys,parentId,parentName,showStatus} = this.state
+    const categroy = this.categroy || {}
     // 标题
     const title = parentId==='0'?'一级分类列表':(
       <span>
-        <LinkButton onClick={this.showCategroys}>一级分类列表</LinkButton>
+        <LinkButton onClick={this.showCategorys}>一级分类列表</LinkButton>
         <Icon type='arrow-right' style={{margin:'0px 10px'}}></Icon>
        <span>{parentName}</span>
       </span>
@@ -126,7 +161,7 @@ export default class Category extends React.Component{
     return (
       <Card  title={title} extra={btn} >
         <Table 
-          dataSource={parentId==='0'?categroys:subCategroys}
+          dataSource={parentId==='0'?categorys:subcategorys}
           columns={this.columns} 
           bordered 
           rowKey='_id' 
@@ -139,8 +174,10 @@ export default class Category extends React.Component{
           onOk={this.addCategory}
           onCancel={this.handleCancel}
         >
-          <p>添加</p>
-         
+         <AppForm categorys={categorys} 
+         parentId={parentId}
+         setForm={(form)=>{this.form = form}}
+         ></AppForm>
         </Modal>
         <Modal
           title="修改分类"
@@ -148,8 +185,9 @@ export default class Category extends React.Component{
           onOk={this.upadteCategory}
           onCancel={this.handleCancel}
         >
-          <p>更新</p>
-          
+          <UpdateForm 
+          categroyName={categroy.name} 
+          setForm={(form)=>{this.form = form}}></UpdateForm>
         </Modal>
       </Card>
     )
