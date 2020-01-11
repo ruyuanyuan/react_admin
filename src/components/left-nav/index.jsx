@@ -20,7 +20,7 @@ class LeftNav extends React.Component{
       }else{
         //获取当前路由路径
           const path = this.props.location.pathname
-          const cItempath = item.children.find(citem=>citem.path===path)
+          const cItempath = item.children.find(citem=>path.indexOf(citem.path) === 0)
           if(cItempath){
             this.openkey = item.path
           }
@@ -70,8 +70,10 @@ class LeftNav extends React.Component{
   }
   render(){
     //获取当前路由路径
-    const path = this.props.location.pathname
-
+    let path = this.props.location.pathname
+    if(path.indexOf('/product') === 0){
+      path = '/product'
+    }
     return <div className='left-nav'>
               <Link to='/'>
                 <header className='left-nav-header'>

@@ -1,6 +1,6 @@
 import React from 'react'
 import {withRouter} from 'react-router-dom'
-import { Modal } from 'antd';
+import { Modal,Icon} from 'antd';
 import './index.less'
 import {formateDate} from '../../utils/dateUtils'
 import memory from '../../utils/memory'
@@ -27,7 +27,7 @@ class Header extends React.Component{
       }else if(item.children){
         const cItem=item.children.find(citem=>citem.path === path)
         if(cItem){
-          title = item.title + '>'+ cItem.title
+        title =<span>{item.title} <Icon type='arrow-right' style={{margin:'0px 10px',color:'#1da57a'}}></Icon> {cItem.title}</span> 
         }
       }
     })

@@ -24,7 +24,7 @@ class AddForm extends React.Component{
         <Item label="所属分类">
           {getFieldDecorator('parentId', {
             initialValue:parentId,
-            rules: [{ required: true, message: '请输入分类名称' }],
+            rules: [{ required: true, message: '请选择分类' }],
           })(
             <Select>
               <Option value='0'>一级分类</Option>

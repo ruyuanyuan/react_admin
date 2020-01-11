@@ -52,11 +52,11 @@ export default class Category extends React.Component{
       this.getcategorys()
     })
   }
-  getcategorys= async ()=>{
+  getcategorys= async (pid)=>{
     this.setState({
       loading:true
     })
-    const {parentId} = this.state
+    const parentId = pid ||this.state.parentId
     const result = await categorys(parentId)
     if(result.status===0){
       const categorys = result.data
@@ -89,21 +89,29 @@ export default class Category extends React.Component{
     })
   }
   //添加分类
-  addCategory=async ()=>{
-    console.log('addCategory')
-    this.setState({
-      showStatus:0
+  addCategory=async (e)=>{
+    e.preventDefault();
+    this.form.validateFields(async (err, values) => {
+      if (!err) {
+        this.setState({
+          showStatus:0
+        })
+        const {parentId,cartgroyName} = this.form.getFieldsValue()
+        //重置数据
+        this.form.resetFields()
+        //添加分类接口
+        let result = await addCategorys(parentId,cartgroyName)
+        if(result.status===0){
+          if(parentId === this.state.parentId){
+            this.getcategorys()
+          }else if(parentId === '0'){
+            this.getcategorys('0')
+          }
+        }else{
+          message.error('添加分类失败')
+        }
+      }
     })
-    const {parentId,cartgroyName} = this.form.getFieldsValue()
-    //重置数据
-    this.form.resetFields()
-    //添加分类接口
-    let result = await addCategorys(parentId,cartgroyName)
-    if(result.status===0){
-      this.getcategorys()
-    }else{
-      message.error('添加分类失败')
-    }
   }
   // 显示更新分类
   showUpate=(record)=>{
@@ -114,23 +122,26 @@ export default class Category extends React.Component{
     })
   }
   //更新分类
-  upadteCategory=async ()=>{
-    console.log('upadteCategory')
-    this.setState({
-      showStatus:0
+  upadteCategory=(e)=>{
+    e.preventDefault();
+    this.form.validateFields(async (err, values) => {
+      if (!err) {
+        this.setState({
+          showStatus:0
+        })
+        const categoryId = this.categroy._id
+        const {categoryName} = values
+        //重置数据
+        this.form.resetFields()
+        //更新接口
+        let result = await upadteCategorys(categoryId,categoryName)
+        if(result.status===0){
+          this.getcategorys()
+        }else{
+          message.error('分类名称修改失败')
+        }
+      }
     })
-    const categoryId = this.categroy._id
-    const categoryName = this.form.getFieldValue('categoryName')
-    //重置数据
-    this.form.resetFields()
-    //更新接口
-    let result = await upadteCategorys(categoryId,categoryName)
-    if(result.status===0){
-      this.getcategorys()
-    }else{
-      message.error('分类名称修改失败')
-    }
-    
   }
 
   //为第一次render准备数据
